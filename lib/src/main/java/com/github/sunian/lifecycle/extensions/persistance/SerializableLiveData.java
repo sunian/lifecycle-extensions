@@ -12,17 +12,30 @@ public class SerializableLiveData<T extends Serializable> extends MutableLiveDat
         implements Serializable {
 
     private static final long serialVersionUID = 1;
+    private boolean hasValue = false;
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeObject(getValue());
+        out.writeBoolean(hasValue);
+        if (hasValue) {
+            out.writeObject(getValue());
+        }
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        //noinspection unchecked
-        setValue((T) in.readObject());
+        if (in.readBoolean()) {
+            //noinspection unchecked
+            setValue((T) in.readObject());
+        }
     }
 
     private void readObjectNoData() throws ObjectStreamException {
+        // no-op
+    }
+
+    @Override
+    public void setValue(T value) {
+        super.setValue(value);
+        hasValue = true;
     }
 
 }
